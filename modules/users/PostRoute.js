@@ -4,7 +4,7 @@ const router = express.Router();
 const passport = require("passport");
 
 //Internal routes
-const UserCtrl = require("./controllers/user.controller");
+const PostCtrl = require("./controllers/post.controller");
 
 // router.all(
 //   "*",
@@ -12,11 +12,11 @@ const UserCtrl = require("./controllers/user.controller");
 //   (req, res, next) => next()
 // );
 
-router.put("/user/:id", UserCtrl.Update);
-router.get("/user/:id", UserCtrl.Details);
-router.post("/user/:id", UserCtrl.Remove);
-router.put("/follow/:id", UserCtrl.Follow);
-router.put("/unfollow/:id", UserCtrl.Unfollow);
+router.put("/posts/:id", PostCtrl.Update);
+// router.get("/post/:id", UserCtrl.Details);
+router.post("/posts/", PostCtrl.Create);
+router.post("/posts/:id", PostCtrl.Remove);
+// router.put("/unfollow/:id", UserCtrl.Unfollow);
 
 //Exports router
 module.exports = router;

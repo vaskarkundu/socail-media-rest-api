@@ -1,50 +1,58 @@
 //Internal routes
-const UserRepo = require("../repositories/user.repository");
-const securePassword = require("../../auth/services/securePassword");
-exports.Update = async (req, res, next) => {
-  console.log(req.body.city);
-  let userID = req.params.id;
-  let user = await UserRepo.Single({ _id: userID });
-  console.log(user);
+const PostRepo = require("../repositories/post.repository");
+//const securePassword = require("../../auth/services/securePassword");
+exports.Create = async (req, res) => {
   try {
-    if (req.body.password) {
-      try {
-        let hasspass = await securePassword(req.body.password);
-        req.body.password = hasspass;
-      } catch (err) {
-        return res.status(500).json(err);
-      }
-    }
-    user = Object.assign(user, req.body);
-    user = await user.save();
-    return res.json({ message: "User updated successfully", data: user });
+    const post = await PostRepo.Create(req.body);
+    res.status(200).json({ message: "Post created successfully", data: post });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+//need to chnage like delete route
+exports.Update = async (req, res, next) => {
+  let postID = req.params.id;
+  try {
+    let post = await PostRepo.Single({ _id: postID });
+
+    post = Object.assign(post, req.body);
+    post = await post.save();
+    return res.json({ message: "Post updated successfully", data: post });
   } catch (error) {
-    next(error);
+    res.status(500).json(err);
   }
 };
 
-exports.Details = async (req, res, next) => {
-  try {
-    let userID = req.params.id;
-    let user = await UserRepo.Single({ _id: userID });
-    const { password, updatedAt, ...other } = user._doc;
-    res.json({ message: "user founded successfully", data: other });
-  } catch {
-    res.json({
-      message: "user not found",
-      data: user,
-    });
-  }
-};
+// exports.Details = async (req, res, next) => {
+//   try {
+//     let userID = req.params.id;
+//     let user = await UserRepo.Single({ _id: userID });
+//     const { password, updatedAt, ...other } = user._doc;
+//     res.json({ message: "user founded successfully", data: other });
+//   } catch {
+//     res.json({
+//       message: "user not found",
+//       data: user,
+//     });
+//   }
+// };
 
 exports.Remove = async (req, res, next) => {
   try {
-    let userID = req.params.id;
-    let user = await UserRepo.Delete({ _id: userID });
-    return res.json({ message: "user removed successfully" });
+    let postID = req.params.id;
+    let post = await PostRepo.Single({ _id: postID });
+
+    if (post.userId == req.body.userId) {
+      let post = await PostRepo.Delete({ _id: postID });
+      res
+        .status(200)
+        .json({ message: "The post deleted successfully", data: post });
+    } else {
+      res.status(403).json({ message: "You can only delete your post" });
+    }
   } catch {
-    res.json({
-      message: "user not found",
+    res.status(500).json({
+      message: "post not found",
     });
   }
 };
