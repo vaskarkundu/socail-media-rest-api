@@ -10,6 +10,9 @@ const Create = async (data) => {
 const Single = async (query) => {
   return await PostModel.findOne(query);
 };
+const Find = async (query) => {
+  return await PostModel.findById(query);
+};
 const Delete = async (query) => {
   return await PostModel.deleteOne(query);
 };
@@ -25,4 +28,5 @@ module.exports = {
   Follower,
   Following,
   Create,
+  Find,
 };

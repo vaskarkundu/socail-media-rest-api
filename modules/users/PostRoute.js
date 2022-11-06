@@ -12,10 +12,11 @@ const PostCtrl = require("./controllers/post.controller");
 //   (req, res, next) => next()
 // );
 
-router.put("/posts/:id", PostCtrl.Update);
-// router.get("/post/:id", UserCtrl.Details);
+router.put("/posts/:id/update", PostCtrl.Update);
+router.put("/posts/:id/likes", PostCtrl.Likes);
+router.get("/posts/:id/get", PostCtrl.Gets);
 router.post("/posts/", PostCtrl.Create);
-router.post("/posts/:id", PostCtrl.Remove);
+router.post("/posts/:id/remove", PostCtrl.Remove);
 // router.put("/unfollow/:id", UserCtrl.Unfollow);
 
 //Exports router

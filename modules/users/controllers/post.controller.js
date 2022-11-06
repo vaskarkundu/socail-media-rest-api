@@ -1,5 +1,9 @@
 //Internal routes
+const Post = require("../models/Post");
+const User = require("../models/User");
+const router = require("../PostRoute");
 const PostRepo = require("../repositories/post.repository");
+const UserRepo = require("../repositories/user.repository");
 //const securePassword = require("../../auth/services/securePassword");
 exports.Create = async (req, res) => {
   try {
@@ -14,10 +18,11 @@ exports.Update = async (req, res, next) => {
   let postID = req.params.id;
   try {
     let post = await PostRepo.Single({ _id: postID });
-
-    post = Object.assign(post, req.body);
-    post = await post.save();
-    return res.json({ message: "Post updated successfully", data: post });
+    if (post.userId === req.body.userId) {
+      post = Object.assign(post, req.body);
+      post = await post.save();
+      return res.json({ message: "Post updated successfully", data: post });
+    }
   } catch (error) {
     res.status(500).json(err);
   }
@@ -59,25 +64,18 @@ exports.Remove = async (req, res, next) => {
 
 // follow a user
 
-exports.Follow = async (req, res, next) => {
-  if (req.body.userId !== req.params.id) {
-    try {
-      const user = await UserRepo.Single({ _id: req.params.id });
-      console.log(user);
-      const currentUser = await UserRepo.Single({ _id: req.body.userId });
-      console.log(currentUser);
-      if (!user.followers.includes(req.body.userId)) {
-        await user.updateOne({ $push: { followers: req.body.userId } });
-        await currentUser.updateOne({ $push: { followings: req.params.id } });
-        res.status(200).json("User Follower anf Following is updated");
-      } else {
-        res.status(403).json("you already follow this user");
-      }
-    } catch (err) {
-      res.status(500).json(err);
+exports.Likes = async (req, res) => {
+  try {
+    const post = await PostRepo.Find(req.params.id);
+    if (!post.likes.includes(req.body.userId)) {
+      await post.updateOne({ $push: { likes: req.body.userId } });
+      res.status(200).json("The post has been liked");
+    } else {
+      await post.updateOne({ $pull: { likes: req.body.userId } });
+      res.status(200).json("The post has been disliked");
     }
-  } else {
-    res.status(403).json("you can't follow yourself");
+  } catch (err) {
+    res.status(500).json(err);
   }
 };
 
@@ -103,5 +101,29 @@ exports.Unfollow = async (req, res, next) => {
     }
   } else {
     res.status(403).json("you can't unfollow yourself");
+  }
+};
+exports.Gets = async (req, res) => {
+  try {
+    const post = await PostRepo.Find(req.params.id);
+    res.status(200).json(post);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+// Timeliners
+exports.Timeline = async (req, res) => {
+  try {
+    const currentUser = await UserRepo.FindId(req.body.userId);
+    const userPosts = await Post.find({ userId: currentUser._id });
+    const friendPosts = await Promise.all(
+      currentUser.followings.map((friendId) => {
+        Post.find({ userId: friendId });
+      })
+    );
+    res.json(userPosts.concat(...friendPosts));
+  } catch (err) {
+    res.status(500).json(err);
   }
 };

@@ -10,6 +10,9 @@ let Find = async function (query) {
 const Single = async (query) => {
   return await UserModel.findOne(query);
 };
+const FindId = async (query) => {
+  return await UserModel.findById(query);
+};
 const Delete = async (query) => {
   return await UserModel.deleteOne(query);
 };
@@ -25,4 +28,5 @@ module.exports = {
   Find,
   Follower,
   Following,
+  FindId,
 };
